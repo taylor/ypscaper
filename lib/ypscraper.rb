@@ -19,8 +19,7 @@ class YPProvider
 end
 
 class YPScraper
-  attr_reader :default_provider
-  attr_accessor :providers, :current_provider
+  attr_reader :default_provider, :providers
   attr_accessor :agent
   protected :agent
 
@@ -50,10 +49,14 @@ class YPScraper
   end
 
   def add_provider(name, uri, sp, sk, lk)
-      @providers[name] =  YPProvider.new(name, uri, sp, sk, lk)
+    @providers[name] =  YPProvider.new(name, uri, sp, sk, lk)
   end
 
-  def set_provider(name)
+  def default_provider=(name=nil)
+    set_provider(name)
+  end
+
+  def set_provider(name=nil)
     if @providers[name].nil?
       false
     else
@@ -62,9 +65,23 @@ class YPScraper
     end
   end
 
-  def search(keyword, location)
-    url = provider
-    get_page
+  def search(keyword, city, state, name=@default_provider)
+    if @providers[name].nil?
+      return nil
+    end
+
+    p=@providers[name]
+
+    case p.lk
+    when '-'
+      location = "#{city.capitalize}-#{state.upcase}"
+    else
+      location = "#{city.capitalize}, #{state.upcase}"
+    end
+
+    url = "#{p.uri}/#{p.search_path}?#{p.sk}=#{keyword}&#{p.lk}=#{location}"
+    #get_page(url)
+    false
   end
 
   def get_page(url)
@@ -82,10 +99,13 @@ class YPScraper
 
 
   # switchboard
-  # results.htm?cid=&MEM=1&ypcobrand=1&PR=&ST=&inputwhat_dirty=1&KW=dentist&initial=&inputwhere_dirty=1&LO=austin%2C+tx&SD=-1&search.x=0&search.y=0&search=Search&semChannelId=&semSessionId
+  # http://www.switchboard.com/results.htm?KW=dentist&LO=austin%2C+tx
+  #
   # superpages
   # http://yellowpages.superpages.com/listings.jsp?CS=L&MCBP=true&search=Find+It&SRC=&C=dentist&STYPE=S&L=austin%2Ctx&x=0&y=0
+  #
   # yellow pages
+  # http://www.yellowpages.com/categories/Austin-TX/dentist
   # location is CITY-STATE where City starts with a capital letter and State is the abberviation
 end
 
