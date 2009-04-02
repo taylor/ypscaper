@@ -62,9 +62,12 @@ describe YPScraper do
     @yp.default_provider.should == :switchboard
   end
 
+  it "should be able to search and get valid title for page using default provider" do
+    @yp.search("dentist", "austin", "tx").title.should == "dentist in Austin, TX - Yellow Pages - Switchboard.com"
+  end
 
-  it "should be able to search and get valid title for page" do
-    @yp.search("dentist", "austin, tx").title.should == "dentist in Austin, TX - Yellow Pages - Switchboard.com"
+  it "should be able to search and get valid title for page using when explicitly specifying the provider" do
+    @yp.search("dentist", "austin", "tx", :superpages).title.should match(/dentist Austin TX/)
   end
 
   #@yp.provider[:switchboard][:search_path].should == "results.htm?KW=dentist&LO=austin%2C+tx"
