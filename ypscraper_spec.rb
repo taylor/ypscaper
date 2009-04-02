@@ -62,13 +62,22 @@ describe YPScraper do
     @yp.default_provider.should == :switchboard
   end
 
+  it "should return a YPResult object for a valid search" do
+    @yp.search("dentist", "austin", "tx").class.should == YPResult
+  end
+
   it "should be able to search and get valid title for page using default provider" do
     @yp.search("dentist", "austin", "tx").title.should == "dentist in Austin, TX - Yellow Pages - Switchboard.com"
   end
 
   it "should be able to search and get valid title for page using when explicitly specifying the provider" do
-    @yp.search("dentist", "austin", "tx", :superpages).title.should match(/dentist Austin TX/)
+    @yp.search("dentist", "austin", "tx", :provider=>:superpages).title.should match(/dentist Austin TX/)
   end
+
+  it "should have 10 items in results for searches that return 10 or more results" do
+    @yp.search("dentist", "austin", "tx").result.size == 10
+  end
+
 
   #@yp.provider[:switchboard][:search_path].should == "results.htm?KW=dentist&LO=austin%2C+tx"
 end
