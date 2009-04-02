@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'mechanize'
+require 'uri'
 
 class YPProvider
   attr_reader :name
@@ -9,18 +10,21 @@ class YPProvider
   def initialize(name, uri, sp, sk, lk)
     @name = name
     @uri, @search_path, @sk, @lk = uri, sp, sk, lk
-    # @provider = {
-    #   :superpages => { :uri => 'http://yellowpages.superpages.com', :search_path => 'listings.jsp', :sk => 'C', :lk => 'L' },
-    #   :switchboard => { :uri => 'http://www.switchboard.com', :search_path => 'results.htm', :sk => 'KW', :lk => 'LO' },
-    #   :yellowpages => { :uri => 'http://www.yellowpages.com', :search_path => 'categories/', :lk => '-' }
-    # }
   end
+end
 
+class YPResult
+  attr_accessor :page, :title, :result
+  def initialize(page)
+    @page = page
+    @title = page.title
+    @result = []
+  end
 end
 
 class YPScraper
   attr_reader :default_provider, :providers
-  attr_accessor :agent
+  attr_accessor :agent, :city, :state
   protected :agent
 
   def initialize(provider=nil, proxy_host=nil, proxy_port=nil)
@@ -65,23 +69,36 @@ class YPScraper
     end
   end
 
-  def search(keyword, city, state, name=@default_provider)
+  def search(keyword, city, state, opts={})
+    page        = nil
+    name        = opts[:provider] || @default_provider
+    num_results = opts[:num_results] || 10
+    url = nil
+
     if @providers[name].nil?
       return nil
     end
 
-    p=@providers[name]
-
-    case p.lk
-    when '-'
-      location = "#{city.capitalize}-#{state.upcase}"
-    else
-      location = "#{city.capitalize}, #{state.upcase}"
+    if num_results.class != Fixnum and num_results != :all
+      raise ArgumentError, "num results should be a Fixnum or :all"
     end
 
-    url = "#{p.uri}/#{p.search_path}?#{p.sk}=#{keyword}&#{p.lk}=#{location}"
-    #get_page(url)
-    false
+    p=@providers[name]
+
+    p name
+    p p.name
+    case p.name
+    when :yellowpages
+      location = "#{city.capitalize}-#{state.upcase}"
+      url = "#{p.uri}/#{p.search_path}?#{p.sk}#{location}/#{keyword}"
+    else
+      location = URI.escape("#{city.capitalize},#{state.upcase}")
+      url = "#{p.uri}/#{p.search_path}?#{p.sk}=#{keyword}&#{p.lk}=#{location}"
+    end
+
+    p url
+    ypr = YPResult.new(get_page(url))
+    ypr
   end
 
   def get_page(url)
