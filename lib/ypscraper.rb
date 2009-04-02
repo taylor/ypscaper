@@ -114,11 +114,18 @@ class YPScraper
 
     # FIXME: results will be out of order from what is on page
     #page.search("//div[@class='body']")
+    #
+    # page.search("//div[regex(., 'ad\s.*')]", Class.new {
+    #   def regex node_set, regex
+    #     node_set.find_all { |node| node['class'] =~ /#{regex}/ }
+    #   end
+    # }.new).each_with_index {|r,i| parse_results.call(r,i) }
+
     page.search("//div[@class='ad ']").each_with_index {|r,i| parse_results.call(r,i) }
     page.search("//div[@class='ad idearc_bgcolor_blue']").each_with_index {|r,i| parse_results.call(r,i) }
 
     results.each {|r| p r.name}
-    
+
     results
   end
 
