@@ -14,11 +14,10 @@ class YPProvider
 end
 
 class YPResult
-  attr_accessor :page, :title, :result
-  def initialize(page)
-    @page = page
-    @title = page.title
-    @result = []
+  attr_accessor :url, :name, :phone, :address, :email, :provider
+  def initialize(name, phone, address, url, email, provider=nil)
+    @url, @name, @phone, @address, @email = url, name, phone, address, email
+    @provider = provider
   end
 end
 
@@ -85,7 +84,6 @@ class YPScraper
 
     p=@providers[name]
 
-    p name
     p p.name
     case p.name
     when :yellowpages
@@ -96,9 +94,32 @@ class YPScraper
       url = "#{p.uri}/#{p.search_path}?#{p.sk}=#{keyword}&#{p.lk}=#{location}"
     end
 
+    #url = 'http://www.switchboard.com/results.htm?KW=dentist&LO=Austin%2CTX&R=&SD=&PARMAPI=SRC%3Dswitchboard2%26sessionId%3DFD6061260DCE4E9E5BE4D8B75AF429D2%26C%3Ddentist%26PS%3D10%26STYPE%3DS%26L%3DAustin%2BTX%26XSL%3Doff%26EG%3D2%26paging%3D1%26PBL%3Dtrue%26PI%3D10'
     p url
-    ypr = YPResult.new(get_page(url))
-    ypr
+
+    page = get_page(url)
+
+    results=[]
+
+    parse_results = lambda do |r,i|
+      n=nil
+      p n
+      n=r.search("span[@class='name ']").text
+      n=r.search("span[@class='name idearc_red idearc_font_large']").text if n.empty?
+      n=r.search("span[@class='name idearc_red idearc_font_large idearc_font_italic']").text if n.empty?
+
+      results << YPResult.new(n, nil, nil, nil, nil, @default_provider) if not n.empty?
+      puts "nothing found for row #{i}" if n.nil?
+    end
+
+    # FIXME: results will be out of order from what is on page
+    #page.search("//div[@class='body']")
+    page.search("//div[@class='ad ']").each_with_index {|r,i| parse_results.call(r,i) }
+    page.search("//div[@class='ad idearc_bgcolor_blue']").each_with_index {|r,i| parse_results.call(r,i) }
+
+    results.each {|r| p r.name}
+    
+    results
   end
 
   def get_page(url)
@@ -112,8 +133,6 @@ class YPScraper
     end
     page
   end
-
-
 
   # switchboard
   # http://www.switchboard.com/results.htm?KW=dentist&LO=austin%2C+tx
