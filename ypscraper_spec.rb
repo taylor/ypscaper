@@ -16,9 +16,9 @@ describe YPScraper do
     yp.default_provider.should_not == nil
   end
 
-  it "should have a provider yellowpages set if yellowpages is specified when creating a new YP object" do
+  it "should have a default provider of yellowpages if yellowpages is specified when creating a new YP object" do
     yp = YPScraper.new(:yellowpages)
-    yp.current_provider.should == :yellowpages
+    yp.default_provider.should == :yellowpages
   end
 
   it "should be able to access the uri for the default provider via the provider method and receive a valid response" do
@@ -47,14 +47,25 @@ describe YPScraper do
     @yp.provider(:switchboard).lk.should == "LO"
   end
 
+  # FIXME: use mock/stub instead of actuall call possibly
   it "should be able to get a url and show the title for that page" do
     @yp.get_page(@yp.provider(:switchboard).uri).title.should == 'Yellow Pages, White Pages, Maps, and more - Switchboard.com'
   end
 
-  # it "should have a valid title set when for provider switchboard" do
-  #   @yp = YPScraper.new(:switchboard)
-  #   @yp.search("dentist", "austin, tx").title.should == "dentist in Austin, TX - Yellow Pages - Switchboard.com"
-  # end
+  it "should be able to set default provider for searching and other methods" do
+    @yp.set_provider(:superpages).should == true
+    @yp.default_provider.should == :superpages
+  end
+
+  it "should return false and not change default provider if provider specified for set_provider is not found" do
+    @yp.set_provider(:invalid_provider).should == false
+    @yp.default_provider.should == :switchboard
+  end
+
+
+  it "should be able to search and get valid title for page" do
+    @yp.search("dentist", "austin, tx").title.should == "dentist in Austin, TX - Yellow Pages - Switchboard.com"
+  end
 
   #@yp.provider[:switchboard][:search_path].should == "results.htm?KW=dentist&LO=austin%2C+tx"
 end
