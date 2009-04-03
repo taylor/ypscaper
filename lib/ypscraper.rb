@@ -74,12 +74,13 @@ class YPScraper
     name        = opts[:provider] || @default_provider
     num_results = opts[:num_results] || 10
     url = nil
+    results=[]
 
     if @providers[name].nil?
-      return nil
-    end
-
-    if num_results.class != Fixnum and num_results != :all
+      return results
+    elsif num_results.class != Fixnum and num_results == :all
+      num_results = -1
+    elsif num_results.class != Fixnum
       raise ArgumentError, "num results should be a Fixnum or :all"
     end
 
@@ -94,18 +95,33 @@ class YPScraper
       url = "#{p.uri}/#{p.search_path}?#{p.sk}=#{keyword}&#{p.lk}=#{location}"
     end
 
-    page = get_page(url)
+    # page = get_page(url)
+    # return results if page.nil?
+    # results += parse_page(page)
 
-    results=[]
+    loop do
+      page = get_page(url)
+      return results if page.nil?
+      results += parse_page(page)
 
-    return results if page.nil?
-
-    results += parse_page(page)
+      case p.name
+      when :switchboard
+        # p page.search("//span[@class='pagingcontrols']").search("a").last
+        # p page.search("//span[@class='pagingcontrols']")
+        # return []
+        if ((num_results >= 0 and results.size >= num_results) or
+            (page.search("//span[@class='pagingcontrols']").search("a").last.nil?) or
+            (page.search("//span[@class='pagingcontrols']").search("a").last.text != 'Next'))
+          break
+        end
+        url = "#{p.uri}/" + page.search("//span[@class='pagingcontrols']").search("a").last.attribute("href").text
+      else
+        break
+      end
+    end
 
     # Switchboard - determine if there are more results
     # p.search("//span[@class='pagingcontrols']").search("a").last.text == 'Next'
-
-    #results.each {|r| p r.name; puts "\turl: #{r.url}\n\temail: #{r.email}\n\tphone: #{r.phone}\n"}
 
     results
   end
