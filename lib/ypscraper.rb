@@ -14,9 +14,10 @@ class YPProvider
 end
 
 class YPResult
-  attr_accessor :url, :name, :phone, :address, :email, :provider
-  def initialize(name, phone, address, url, email, provider=nil)
+  attr_accessor :url, :name, :phone, :address, :city, :state, :zip, :email, :provider
+  def initialize(name, phone, address, city, state, zip, url, email, provider=nil)
     @url, @name, @phone, @address, @email = url, name, phone, address, email
+    @city, @state, @zip = city, state, zip
     @provider = provider
   end
 end
@@ -101,30 +102,56 @@ class YPScraper
 
     results=[]
 
-    parse_results = lambda do |r,i|
-      n=nil
-      p n
-      n=r.search("span[@class='name ']").text
-      n=r.search("span[@class='name idearc_red idearc_font_large']").text if n.empty?
-      n=r.search("span[@class='name idearc_red idearc_font_large idearc_font_italic']").text if n.empty?
+    return results if @default_provider != :switchboard
 
-      results << YPResult.new(n, nil, nil, nil, nil, @default_provider) if not n.empty?
-      puts "nothing found for row #{i}" if n.nil?
+    # switch board pasring
+    parse_results = lambda do |r,i|
+      name=nil
+      phone = nil
+      address, city, state, zip = nil, nil, nil, nil
+      url, email = nil, nil
+
+      name=r.search("span[@class='name ']").text
+      name=r.search("span[@class='name idearc_red idearc_font_large']").text if name.empty?
+      name=r.search("span[@class='name idearc_red idearc_font_large idearc_font_italic']").text if name.empty?
+      unless name.empty?
+        unless r.search("span[@class='emailline']/a").empty?
+          email = r.search("span[@class='emailline']/a")[0].attribute("href").text.sub("mailto:","")
+        end
+        s=r.search(r.path + "/div/span[@class='Link_SearchTheWeb']/a")
+        s=r.search(r.path + "/div[@class='otherlinks']/a") if s.empty?
+        unless s.empty?
+          unless s[0].attribute("href").text.match(/^\/webresults.htm/)
+            m = r.search(r.path + "/div[@class='otherlinks']/a")[0].attribute("href").text.match(/LOC=(.*)/)
+            m = r.search(r.path + "/div/span[@class='Link_SearchTheWeb']/a")[0].attribute("href").text.match(/dest=([^&]*)/) if m.nil?
+            m = r.search(r.path + "/div/span[@class='Link_SearchTheWeb']/a").first.attribute("href").text.match(/LOC=(.*)/) if m.nil?
+            url = URI.unescape(m[1]) unless m.nil?
+          end
+        end
+        unless r.search("a[@class='linklist']").empty?
+          m = r.search("a[@class='linklist']")[0].attribute("onclick").text.match(/showSWPhone\('([^']*)'/)
+          phone = m[1] unless m.nil?
+        end
+        unless r.search("span[@class='address']").empty?
+          address = r.search("span[@class='address']").text.strip.sub(/,$/, '')
+        end
+        unless r.search("span[@class='citystatezip']").empty?
+          city, state = r.search("span[@class='citystatezip']").text.gsub('zip code', '').strip.split(", ")
+        end
+
+        #def YPResult.initialize(name, phone, address, city, state, zip, url, email, provider=nil)
+        results << YPResult.new(name, phone, address, city, state, zip, url, email,  @default_provider)
+      else
+        puts "nothing found for row #{i}" if n.nil?
+      end
     end
 
     # FIXME: results will be out of order from what is on page
-    #page.search("//div[@class='body']")
-    #
-    # page.search("//div[regex(., 'ad\s.*')]", Class.new {
-    #   def regex node_set, regex
-    #     node_set.find_all { |node| node['class'] =~ /#{regex}/ }
-    #   end
-    # }.new).each_with_index {|r,i| parse_results.call(r,i) }
 
     page.search("//div[@class='ad ']").each_with_index {|r,i| parse_results.call(r,i) }
     page.search("//div[@class='ad idearc_bgcolor_blue']").each_with_index {|r,i| parse_results.call(r,i) }
 
-    results.each {|r| p r.name}
+    #results.each {|r| p r.name; puts "\turl: #{r.url}\n\temail: #{r.email}\n\tphone: #{r.phone}\n"}
 
     results
   end
