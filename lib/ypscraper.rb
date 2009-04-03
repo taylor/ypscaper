@@ -85,7 +85,6 @@ class YPScraper
 
     p=@providers[name]
 
-    p p.name
     case p.name
     when :yellowpages
       location = "#{city.capitalize}-#{state.upcase}"
@@ -95,17 +94,12 @@ class YPScraper
       url = "#{p.uri}/#{p.search_path}?#{p.sk}=#{keyword}&#{p.lk}=#{location}"
     end
 
-    #url = 'http://www.switchboard.com/results.htm?KW=dentist&LO=Austin%2CTX&R=&SD=&PARMAPI=SRC%3Dswitchboard2%26sessionId%3DFD6061260DCE4E9E5BE4D8B75AF429D2%26C%3Ddentist%26PS%3D10%26STYPE%3DS%26L%3DAustin%2BTX%26XSL%3Doff%26EG%3D2%26paging%3D1%26PBL%3Dtrue%26PI%3D10'
-    p url
-
     page = get_page(url)
 
     results=[]
 
-    return results if @default_provider != :switchboard
-
     # switch board pasring
-    parse_results = lambda do |r,i|
+    parse_switchboard = lambda do |r,i|
       name=nil
       phone = nil
       address, city, state, zip = nil, nil, nil, nil
@@ -142,14 +136,24 @@ class YPScraper
         #def YPResult.initialize(name, phone, address, city, state, zip, url, email, provider=nil)
         results << YPResult.new(name, phone, address, city, state, zip, url, email,  @default_provider)
       else
-        puts "nothing found for row #{i}" if n.nil?
+        puts "nothing found for row #{i}"
       end
     end
 
     # FIXME: results will be out of order from what is on page
 
-    page.search("//div[@class='ad ']").each_with_index {|r,i| parse_results.call(r,i) }
-    page.search("//div[@class='ad idearc_bgcolor_blue']").each_with_index {|r,i| parse_results.call(r,i) }
+    page.search("//div[@class='ad ']").each_with_index do |r,i|
+      case @default_provider
+      when :switchboard
+        parse_switchboard.call(r,i)
+      end
+    end
+    page.search("//div[@class='ad idearc_bgcolor_blue']").each_with_index do |r,i|
+      case @default_provider
+      when :switchboard
+        parse_switchboard.call(r,i)
+      end
+    end
 
     #results.each {|r| p r.name; puts "\turl: #{r.url}\n\temail: #{r.email}\n\tphone: #{r.phone}\n"}
 
