@@ -1,10 +1,8 @@
 require 'myconfig'
-include MyConfig
 require 'ypscraper'
 
 describe YPScraper do
   before(:all) do
-    @s = MyConfig.settings
     # FIXME: validate cached web pages for testing are less than 1 day old
   end
 
