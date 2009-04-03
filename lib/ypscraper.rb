@@ -36,7 +36,7 @@ class YPScraper
 
     @agent.user_agent_alias = 'Mac Safari'
 
-    @default_provider = provider || :superpages
+    @default_provider = provider || :switchboard
     @current_provider = @default_provider
 
     @providers = {}
