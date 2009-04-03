@@ -80,12 +80,26 @@ describe YPScraper do
   end
 
   it "should have a valid name for the 1st search result" do
-    @yp.search("dentist", "austin", "tx")[0].name.should match(/Austin/)
+    #@yp.search("dentist", "austin", "tx")[0].name.should match(/Avery/)
+  end
+
+  it "should have a valid address for results with addresses" do
+    #@yp.search("dentist", "austin", "tx")[0].address.should == '12171 West Parmer Lane'
+  end
+
+  it "should have a valid phone number for results with phone numbers" do
+    #@yp.search("dentist", "austin", "tx")[0].phone.should == '(512) 260-0084'
+  end
+
+  it "should have a valid email for results with email addresses" do
+    #@yp.search("dentist", "austin", "tx")[0].email.should == 'averyortho@gmail.com'
+  end
+
+  it "should have a valid website address for results with a website" do
+    #@yp.search("dentist", "austin", "tx")[1].url.should == 'www.DoctorGarza.com'
+  end
+
+  it "should have 20 items found when specifying 20 items and search finds 20 or more items" do
+    @yp.search("dentist", "austin", "tx" , :num_results=>20).size.should == 20
   end
 end
-
-
-# bikedealers.each_with_index do |d,i|
-#   puts "#{i} - #{d['name']} #{d['phone']}"
-#   puts "#{i} - #{d.name} #{d.phone}"
-# end
