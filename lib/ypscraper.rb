@@ -98,6 +98,22 @@ class YPScraper
 
     results=[]
 
+    return results if page.nil?
+
+    results += parse_page(page)
+
+    # Switchboard - determine if there are more results
+    # p.search("//span[@class='pagingcontrols']").search("a").last.text == 'Next'
+
+    #results.each {|r| p r.name; puts "\turl: #{r.url}\n\temail: #{r.email}\n\tphone: #{r.phone}\n"}
+
+    results
+  end
+
+  def parse_page(page=nil)
+    results = []
+    return results if page.nil?
+
     # switch board pasring
     parse_switchboard = lambda do |r,i|
       name=nil
@@ -141,21 +157,15 @@ class YPScraper
     end
 
     # FIXME: results will be out of order from what is on page
-
-    page.search("//div[@class='ad ']").each_with_index do |r,i|
-      case @default_provider
-      when :switchboard
+    case @default_provider
+    when :switchboard
+      page.search("//div[@class='ad ']").each_with_index do |r,i|
+        parse_switchboard.call(r,i)
+      end
+      page.search("//div[@class='ad idearc_bgcolor_blue']").each_with_index do |r,i|
         parse_switchboard.call(r,i)
       end
     end
-    page.search("//div[@class='ad idearc_bgcolor_blue']").each_with_index do |r,i|
-      case @default_provider
-      when :switchboard
-        parse_switchboard.call(r,i)
-      end
-    end
-
-    #results.each {|r| p r.name; puts "\turl: #{r.url}\n\temail: #{r.email}\n\tphone: #{r.phone}\n"}
 
     results
   end
