@@ -17,11 +17,15 @@ yellowpages.com (:yellowpages) are on the way.
     require 'ypscraper'
     yp = YPScraper.new(:switchboard)
 
-    results = []
-
-    results = yp.search("dentist", "austin", "tx")
+    print "Number of results for first page of when searching dentist in austin, tx is " + 
+      yp.search("dentist", "austin", "tx").size.to_s
+    puts
 
     results = yp.search("Periodontics Dentists", "austin", "tx" , :num_results=>:all)
+
+    results.each_with_index do |r,i|
+      puts "#{i} - #{r.name} / #{r.url} / #{r.address} / #{r.url}"
+    end
 
 == License
 
