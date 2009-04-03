@@ -50,7 +50,7 @@ describe YPScraper do
 
   # FIXME: use mock/stub instead of actuall call possibly
   it "should be able to get a url and show the title for that page" do
-    #@yp.get_page(@yp.provider(:switchboard).uri).title.should == 'Yellow Pages, White Pages, Maps, and more - Switchboard.com'
+    @yp.get_page(@yp.provider(:switchboard).uri).title.should == 'Yellow Pages, White Pages, Maps, and more - Switchboard.com'
   end
 
   it "should be able to set default provider for searching and other methods" do
@@ -64,39 +64,31 @@ describe YPScraper do
   end
 
   it "should return and empty list for an invalid search" do
-    #@yp.search("random search stuff", "austin", "tx").should == []
-  end
-
-  it "should be able to search and get valid title for page using default provider" do
-    #@yp.search("dentist", "austin", "tx").title.should == "dentist in Austin, TX - Yellow Pages - Switchboard.com"
-  end
-
-  it "should be able to search and get valid title for page using when explicitly specifying the provider" do
-    #@yp.search("dentist", "austin", "tx", :provider=>:superpages).title.should match(/dentist Austin TX/)
+    @yp.search("random search stuff", "austin", "tx").should == []
   end
 
   it "should have 10 items in results for searches that return 10 or more results" do
-    #@yp.search("dentist", "austin", "tx").size.should >= 10
+    @yp.search("dentist", "austin", "tx").size.should >= 10
   end
 
   it "should have a valid name for the 1st search result" do
-    #@yp.search("dentist", "austin", "tx")[0].name.should match(/Avery/)
+    @yp.search("dentist", "austin", "tx")[0].name.should match(/Avery/)
   end
 
   it "should have a valid address for results with addresses" do
-    #@yp.search("dentist", "austin", "tx")[0].address.should == '12171 West Parmer Lane'
+    @yp.search("dentist", "austin", "tx")[0].address.should == '12171 West Parmer Lane'
   end
 
   it "should have a valid phone number for results with phone numbers" do
-    #@yp.search("dentist", "austin", "tx")[0].phone.should == '(512) 260-0084'
+    @yp.search("dentist", "austin", "tx")[0].phone.should == '(512) 260-0084'
   end
 
   it "should have a valid email for results with email addresses" do
-    #@yp.search("dentist", "austin", "tx")[0].email.should == 'averyortho@gmail.com'
+    @yp.search("dentist", "austin", "tx")[0].email.should == 'averyortho@gmail.com'
   end
 
   it "should have a valid website address for results with a website" do
-    #@yp.search("dentist", "austin", "tx")[1].url.should == 'www.DoctorGarza.com'
+    @yp.search("dentist", "austin", "tx")[1].url.should == 'www.DoctorGarza.com'
   end
 
   it "should have 20 items found when specifying 20 items and search finds 20 or more items" do
