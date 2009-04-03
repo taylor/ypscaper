@@ -50,6 +50,9 @@ describe YPScraper do
 
   # FIXME: use mock/stub instead of actuall call possibly
   it "should be able to get a url and show the title for that page" do
+    # yp = YPScraper.new
+    # yp.expects(:get_page).with(@yp.provider(:switchboard).uri).title.returns('Yellow Pages, White Pages, Maps, and more - Switchboard.com')
+    # yp.get_page(@yp.provider(:switchboard).uri).title.should == 'Yellow Pages, White Pages, Maps, and more - Switchboard.com'
     @yp.get_page(@yp.provider(:switchboard).uri).title.should == 'Yellow Pages, White Pages, Maps, and more - Switchboard.com'
   end
 
@@ -63,12 +66,16 @@ describe YPScraper do
     @yp.default_provider.should == :switchboard
   end
 
-  it "should return and empty list for an invalid search" do
+  it "should return an empty list for an search that finds no results" do
     @yp.search("random search stuff", "austin", "tx").should == []
   end
 
-  it "should have 10 items in results for searches that return 10 or more results" do
+  it "should have 10 or more items in results for default search" do
     @yp.search("dentist", "austin", "tx").size.should >= 10
+  end
+
+  it "should have 20 items found when specifying 20 items and search finds 20 or more items" do
+    @yp.search("dentist", "austin", "tx" , :num_results=>20).size.should >= 20
   end
 
   it "should have a valid name for the 1st search result" do
@@ -89,9 +96,5 @@ describe YPScraper do
 
   it "should have a valid website address for results with a website" do
     @yp.search("dentist", "austin", "tx")[1].url.should == 'www.DoctorGarza.com'
-  end
-
-  it "should have 20 items found when specifying 20 items and search finds 20 or more items" do
-    @yp.search("dentist", "austin", "tx" , :num_results=>20).size.should == 20
   end
 end
