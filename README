@@ -1,4 +1,32 @@
-Yellow Page Scraper
+Yellow Page Scraper is a library for searching various online yellow pages
+providers such as switchboard.com and superpages.com.
 
-Author: Taylor Carpenter
+The search method returns an array of results or an empty list.  The minimum
+required arguments are keyword, city, and state (passed in that order).  The
+rest of the arguments should be passed as has options 
+
+  :provider => :switchboard
+  :num_results => 10
+  :num_results => :all
+
+Currently only supports switchboard fully.  Superpages (:superpages) and
+yellowpages.com (:yellowpages) are on the way.
+
+== Usage
+
+    require 'ypscraper'
+    yp = YPScraper.new(:switchboard)
+
+    results = []
+
+    results = yp.search("dentist", "austin", "tx")
+
+    results = yp.search("Periodontics Dentists", "austin", "tx" , :num_results=>:all)
+
+== License
+
 Copyright (c) 2009 Taylor Carpenter <taylor@codecafe.com>
+
+You may use, copy and redistribute this library under the same terms as
+{Ruby itself}[http://www.ruby-lang.org/en/LICENSE.txt] or under the 
+{MIT license}[http://mocha.rubyforge.org/files/MIT-LICENSE.html].
