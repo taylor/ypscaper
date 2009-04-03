@@ -78,6 +78,10 @@ describe YPScraper do
     @yp.search("dentist", "austin", "tx" , :num_results=>20).size.should >= 20
   end
 
+  it "should have large number of items when specifying :all" do
+    @yp.search("Periodontics Dentists", "austin", "tx" , :num_results=>:all).size.should >= 30
+  end
+
   it "should have a valid name for the 1st search result" do
     @yp.search("dentist", "austin", "tx")[0].name.should match(/Avery/)
   end
