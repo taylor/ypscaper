@@ -17,7 +17,7 @@ yellowpages.com (:yellowpages) are on the way.
     require 'ypscraper'
     yp = YPScraper.new(:switchboard)
 
-    print "Number of results for first page of when searching dentist in austin, tx is " + 
+    print "Number of results for first page when searching dentist in austin, tx is " + 
       yp.search("dentist", "austin", "tx").size.to_s
     puts
 
