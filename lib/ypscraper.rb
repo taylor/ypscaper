@@ -112,6 +112,7 @@ class YPScraper
         if ((num_results >= 0 and results.size >= num_results) or
             (page.search("//span[@class='pagingcontrols']").search("a").last.nil?) or
             (page.search("//span[@class='pagingcontrols']").search("a").last.text != 'Next'))
+          results = results[0..(results.size-num_results-1)] if results.size > num_results and num_results >= 0
           break
         end
         url = "#{p.uri}/" + page.search("//span[@class='pagingcontrols']").search("a").last.attribute("href").text
