@@ -112,7 +112,6 @@ class YPScraper
         if ((num_results >= 0 and results.size >= num_results) or
             (page.search("//span[@class='pagingcontrols']").search("a").last.nil?) or
             (page.search("//span[@class='pagingcontrols']").search("a").last.text != 'Next'))
-          results = results[0..(results.size-num_results-1)] if results.size > num_results and num_results >= 0
           break
         end
         url = "#{p.uri}/" + page.search("//span[@class='pagingcontrols']").search("a").last.attribute("href").text
@@ -120,6 +119,9 @@ class YPScraper
         break
       end
     end
+
+    puts "results size #{results.size}, num_results #{num_results}"
+    results = results[0..(num_results-1)] if num_results >= 0
 
     # Switchboard - determine if there are more results
     # p.search("//span[@class='pagingcontrols']").search("a").last.text == 'Next'
