@@ -12,17 +12,38 @@ rest of the arguments should be passed as has options
 Currently only supports switchboard fully.  Superpages (:superpages) and
 yellowpages.com (:yellowpages) are on the way.
 
+Each result has at least the name set.  Anything missing will be set to nil.
+Here is the entire list of possible data found (accessed via result.<data name>):
+
+  url - website (often not found or some search url for the provider)
+  name - business name or person's name
+  phone - main phone number (sometimes they have additional numbers.  currently not getting those)
+  address - main address
+  city
+  state
+  zip - usually not there
+  email
+  provider - which provider was used to find the data
+
 == Usage
 
     require 'ypscraper'
     yp = YPScraper.new(:switchboard)
 
+    # See how many entires are on the first page
     print "Number of results for first page when searching dentist in austin, tx is " + 
       yp.search("dentist", "austin", "tx").size.to_s
     puts
 
-    results = yp.search("Periodontics Dentists", "austin", "tx" , :num_results=>:all)
+    # Get 1st 3 yellow page entries
+    results = yp.search("dentist", "austin", "tx" , :num_results=>3)
+    results.each_with_index do |r,i|
+      puts "#{i} - #{r.name} / #{r.url} / #{r.address} / #{r.url}"
+    end
 
+
+    # Get all entries for a search
+    results = yp.search("Periodontics Dentists", "austin", "tx" , :num_results=>:all)
     results.each_with_index do |r,i|
       puts "#{i} - #{r.name} / #{r.url} / #{r.address} / #{r.url}"
     end
